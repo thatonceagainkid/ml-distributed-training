@@ -1,138 +1,193 @@
-# Distributed Training Project
+# ML Distributed Training Project
 
 ## Overview
 
-This project demonstrates the implementation of a PyTorch image classification workflow with support for distributed training using Torchrun.
+This project demonstrates the development, training, evaluation, and deployment of a machine learning image classification model using PyTorch. The project includes single-node model training, distributed training using `torchrun`, experiment tracking, model evaluation, and cloud-based execution on an Azure Virtual Machine.
 
-The project was developed as part of the ICTCLD401 assessment requirements and includes:
+The project was completed as part of the requirements for:
 
-* Model training
-* Evaluation metrics
-* Experiment logging
-* Model checkpointing
-* Distributed execution
-* Cloud deployment and environment setup
-
-The model is trained on the CIFAR-10 dataset using a ResNet18 architecture and supports both single-device and distributed execution modes.
+* ICTCLD401 – Develop and Deploy Machine Learning Solutions
+* ICTCLD402 – Manage Machine Learning Data
+* ICTCLD403 – Implement Machine Learning Models
 
 ---
 
-## Project Structure
+# Project Objectives
+
+The objectives of this project were to:
+
+* Build an image classification model using the CIFAR-10 dataset.
+* Implement a reproducible machine learning workflow.
+* Train and evaluate the model using PyTorch.
+* Implement distributed training using PyTorch Distributed Data Parallel (DDP).
+* Deploy and execute the project within a cloud environment.
+* Document setup, execution, and troubleshooting procedures.
+
+---
+
+# Project Structure
 
 ```text
-.
+ml-distributed-training/
+│
+├── data/
+├── evidence/
+│   ├── PartA/
+│   ├── PartB/
+│   └── PartC/
+│
+├── notebooks/
+├── outputs/
+│   └── metrics.csv
+│
 ├── train.py
 ├── run_distributed.sh
+├── print_env.py
 ├── requirements.txt
 ├── README.md
-├── evidence/
-│   ├── part_a/
-│   ├── part_b/
-│   ├── part_c/
-│   └── logs/
-├── runs/
-└── checkpoints/
+└── .gitignore
 ```
 
 ---
 
-## Environment Requirements
+# Environment Requirements
 
-### Operating Systems
+## Operating System
 
-* Windows 11 (local development)
-* Ubuntu Linux (Azure VM)
+* Ubuntu 24.04 LTS (Azure VM)
 
-### Python
+## Python
 
-* Python 3.10 or later
+* Python 3.12+
 
-### Required Packages
+## Required Packages
+
+Installed through:
+
+```bash
+pip install -r requirements.txt
+```
+
+Main dependencies include:
 
 * torch
 * torchvision
-* numpy
 * pandas
+* numpy
 * matplotlib
 * scikit-learn
 * tqdm
 
-Install dependencies using:
+---
 
-```bash
-pip install -r requirements.txt
-```
+# Azure Environment Setup
+
+## Step 1 – Provision Azure VM
+
+Create an Azure Virtual Machine using Ubuntu 24.04 LTS.
+
+Recommended specifications:
+
+* 2+ vCPUs
+* 8GB RAM
+* Internet connectivity enabled
+* SSH access enabled
+
+Evidence:
+
+* VM Creation.png
 
 ---
 
-## Local Environment Setup
+## Step 2 – Connect Using VSCode Remote SSH
 
-### Create Virtual Environment
+Install the VSCode Remote SSH extension.
 
-```bash
-python -m venv ml_env
-```
-
-### Activate Virtual Environment
-
-#### Windows
+Connect to the Azure VM:
 
 ```bash
-ml_env\Scripts\activate
+ssh -i ml-distributed-training_key.pem azureuser@<public-ip>
 ```
 
-#### Linux
+Evidence:
 
-```bash
-source ml_env/bin/activate
-```
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
+* VSCodeConnectAzureSSH.png
 
 ---
 
-## Azure VM Environment Setup
+## Step 3 – Create Python Virtual Environment
 
-### Provision Azure Virtual Machine
-
-Configuration used:
-
-* Azure Virtual Machine
-* Ubuntu Linux
-* SSH Authentication
-* VSCode Remote SSH
-
-### Connect via SSH
-
-```bash
-ssh azureuser@<PUBLIC_IP>
-```
-
-### Create Virtual Environment
+Create and activate a virtual environment:
 
 ```bash
 python3 -m venv ml_env
 source ml_env/bin/activate
 ```
 
-### Install Dependencies
+Evidence:
+
+* venvcreation.png
+
+---
+
+## Step 4 – Install Dependencies
+
+Install required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
+Evidence:
+
+* dependency install pt1.png
+* dependency install pt2.png
+
 ---
 
-## Running Single Device Training
+# Dataset
+
+The project uses the CIFAR-10 image classification dataset.
+
+Dataset classes:
+
+* Airplane
+* Automobile
+* Bird
+* Cat
+* Deer
+* Dog
+* Frog
+* Horse
+* Ship
+* Truck
+
+Dataset loading is handled automatically by PyTorch:
+
+```python
+torchvision.datasets.CIFAR10(
+    root="./data",
+    train=True,
+    download=True
+)
+```
+
+Downloaded datasets are cached locally and reused in subsequent executions.
+
+---
+
+# Running the Training Script
+
+Execute model training:
+
+```bash
+python train.py
+```
 
 Example:
 
 ```bash
-python train.py --epochs 5 --batch-size 128 --lr 0.001
+python train.py --epochs 5 --batch-size 64
 ```
 
 Expected output:
@@ -140,83 +195,79 @@ Expected output:
 ```text
 Using device: cuda
 Epoch 1/5
-Train Loss: ...
+Training Loss: ...
 Validation Accuracy: ...
 ```
 
+Evidence:
+
+* VM shell run.png
+
 ---
 
-## Running Distributed Training
+# Running Distributed Training
 
-Example:
+Execute distributed training:
 
 ```bash
-bash run_distributed.sh --epochs 5 --batch-size 128 --lr 0.001
+bash run_distributed.sh
 ```
 
-Expected output:
+Example output:
 
 ```text
 ====================================
 Distributed Training Launcher
 ====================================
-Detected GPUs: X
-Launching torchrun
+Detected GPUs: 2
+Launching torchrun...
 ```
 
-If only one GPU or CPU is available, the script automatically falls back to single-process execution.
+Evidence:
+
+* VM distribution.sh run.png
 
 ---
 
-## Logging
+# Output Files
 
-Training metrics are recorded in the runs directory.
+Training generates:
 
-Generated outputs include:
+```text
+outputs/
+└── metrics.csv
+```
 
-* metrics.csv
-* log files
-* model checkpoints
+The metrics file records:
 
-Example metrics output:
+* Epoch
+* Training Loss
+* Validation Loss
+* Accuracy
 
-```csv
-epoch,train_loss,train_acc,val_loss,val_acc
-1,0.8656,0.8619,0.7535,0.9112
-2,0.7018,0.9359,0.7189,0.9230
+---
+
+# Troubleshooting
+
+## Virtual Environment Not Activated
+
+Check:
+
+```bash
+which python
+```
+
+Expected:
+
+```text
+.../ml_env/bin/python
 ```
 
 ---
 
-## Troubleshooting
+## Missing Packages
 
-### Torchrun Not Found
-
-```bash
-python -m torch.distributed.run --nproc_per_node=1 train.py
-```
-
-### CUDA Not Available
-
-Verify installation:
-
-```bash
-python -c "import torch; print(torch.cuda.is_available())"
-```
-
-The training script automatically falls back to CPU execution if CUDA is unavailable.
-
-### Out of Memory Errors
-
-Reduce batch size:
-
-```bash
-python train.py --batch-size 32
-```
-
-### Missing Dependencies
-
-Reinstall requirements:
+Reinstall dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -224,125 +275,130 @@ pip install -r requirements.txt
 
 ---
 
-Evidence Folder Organisation
-evidence/
-├── part_a/
-│   ├── classification report.png
-│   ├── confusion matrix.png
-│   ├── cuda proof.png
-│   ├── dataset+batch_verification.png
-│   ├── experiment tracking.png
-│   └── inference prediction.png
-│
-├── part_b/
-│   ├── confusion matrix distributed launcher.png
-│   ├── distributed training launcher 5 epoch logging.png
-│   ├── distributed training launcher batch size 64.png
-│   ├── distributed training launcher real run.png
-│   ├── distributed training launcher.png
-│   └── run_distributed.sh local test.png
-│
-├── part_c/
-│   ├── VSCodeConnectAzureSSH.png
-│   └── venvcreation.png
-│
-└── logs/
-Assessment Evidence Mapping
-Part A – Single Device Training
+## CUDA Not Detected
 
-Evidence Files:
+Verify installation:
 
-dataset+batch_verification.png
-Demonstrates dataset loading and batch configuration.
-cuda proof.png
-Demonstrates successful CUDA detection and GPU utilisation.
-experiment tracking.png
-Demonstrates training metric tracking and experiment logging.
-confusion matrix.png
-Demonstrates model evaluation output.
-classification report.png
-Demonstrates precision, recall and F1-score reporting.
-inference prediction.png
-Demonstrates model reload and inference prediction functionality.
+```bash
+python -c "import torch; print(torch.cuda.is_available())"
+```
 
-Additional Artefacts:
+Expected:
 
-train.py
-requirements.txt
-metrics.csv
-model checkpoint files
-Part B – Distributed Training
+```text
+True
+```
 
-Evidence Files:
+or
 
-distributed training launcher.png
-Demonstrates launcher startup and hardware detection.
-distributed training launcher real run.png
-Demonstrates successful execution of distributed training.
-distributed training launcher 5 epoch logging.png
-Demonstrates logging during a distributed training session.
-distributed training launcher batch size 64.png
-Demonstrates pass-through argument functionality.
-run_distributed.sh local test.png
-Demonstrates local execution and validation.
-confusion matrix distributed launcher.png
-Demonstrates evaluation output from distributed execution.
+```text
+False
+```
 
-Additional Artefacts:
-
-run_distributed.sh
-distributed training logs
-metrics.csv
-Part C – Documentation and Environment Setup
-
-Evidence Files:
-
-VSCodeConnectAzureSSH.png
-Demonstrates successful VSCode Remote SSH connection to Azure VM.
-venvcreation.png
-Demonstrates creation and activation of a Python virtual environment.
-
-Additional Artefacts:
-
-README.md
-requirements.txt
-Azure VM configuration
-SSH configuration
----
-
-## Unit Mapping Statement
-
-### ICTCLD401 - 4.1 Configure and Prepare a Development Environment
-
-Evidence:
-
-* Azure VM provisioning
-* Python virtual environment creation
-* Dependency installation
-* VSCode Remote SSH configuration
-
-### ICTCLD401 - 4.2 Implement and Validate Environment Configuration
-
-Evidence:
-
-* Successful package installation
-* Environment activation
-* Script execution validation
-* Distributed launcher configuration
-
-### ICTCLD401 - 4.3 Maintain Documentation and Supporting Evidence
-
-Evidence:
-
-* README.md documentation
-* Code comments and docstrings
-* Organised evidence folder structure
-* Training logs and screenshots
+depending on VM hardware configuration.
 
 ---
 
-## Author
+## Distributed Script Permission Error
+
+Grant execution permission:
+
+```bash
+chmod +x run_distributed.sh
+```
+
+---
+
+# Evidence Folder
+
+## Part A – Model Development and Evaluation
+
+* classification report.png
+* confusion matrix.png
+* cuda proof.png
+* dataset+batch_verification.png
+* experiment tracking.png
+* inference prediction.png
+
+---
+
+## Part B – Distributed Training
+
+* confusion matrix distributed launcher.png
+* distributed training launcher.png
+* distributed training launcher real run.png
+* distributed training launcher batch size 64.png
+* distributed training launcher 5 epoch logging.png
+* run_distributed.sh local test.png
+
+---
+
+## Part C – Environment Setup and Documentation
+
+* VM Creation.png
+* VSCodeConnectAzureSSH.png
+* venvcreation.png
+* dependency install pt1.png
+* dependency install pt2.png
+* VM shell run.png
+* VM distribution.sh run.png
+
+---
+
+# Mapping to Unit Criteria
+
+## ICTCLD401 – Environment Configuration
+
+### 4.1 Configure Development Environment
+
+Evidence:
+
+* VM Creation.png
+* VSCodeConnectAzureSSH.png
+* venvcreation.png
+
+Activities:
+
+* Provisioned Azure VM
+* Configured SSH connectivity
+* Created Python virtual environment
+
+### 4.2 Install and Configure Software Components
+
+Evidence:
+
+* dependency install pt1.png
+* dependency install pt2.png
+* VM shell run.png
+
+Activities:
+
+* Installed project dependencies
+* Configured PyTorch environment
+* Verified successful execution
+
+### 4.3 Document and Maintain Environment
+
+Evidence:
+
+* README.md
+* requirements.txt
+* GitHub repository
+* Evidence folder
+
+Activities:
+
+* Produced setup documentation
+* Recorded execution procedures
+* Organised assessment evidence
+* Maintained reproducible project structure
+
+---
+
+# Author
 
 Clayton Lin
 
 Certificate IV in Data Science and Artificial Intelligence
+
+2026
